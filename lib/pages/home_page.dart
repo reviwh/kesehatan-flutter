@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:kesehatan/pages/news_list.dart';
 import 'package:kesehatan/pages/profile.dart';
 
 class HomePage extends StatefulWidget {
@@ -28,7 +29,7 @@ class _HomePageState extends State<HomePage>
       body: TabBarView(
         controller: tabController,
         children: const [
-          ProfilePage(),
+          NewsListPage(),
           ProfilePage(),
           ProfilePage(),
         ],
@@ -42,7 +43,7 @@ class _HomePageState extends State<HomePage>
             controller: tabController,
             tabs: const [
               Tab(
-                text: "Form Registrasi",
+                text: "List Berita",
                 icon: Icon(Icons.input),
               ),
               Tab(
@@ -50,7 +51,7 @@ class _HomePageState extends State<HomePage>
                 icon: Icon(Icons.photo_album),
               ),
               Tab(
-                text: "News",
+                text: "List Karyawan",
                 icon: Icon(Icons.list),
               ),
             ]),
