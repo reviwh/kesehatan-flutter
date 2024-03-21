@@ -1,23 +1,66 @@
 import 'package:flutter/material.dart';
+import 'package:kesehatan/models/general_response.dart';
 import 'package:kesehatan/pages/login.dart';
 import 'package:kesehatan/theme/theme.dart';
+import 'package:kesehatan/utils/constant.dart';
 import 'package:kesehatan/widgets/custom_checkbox.dart';
 import 'package:kesehatan/widgets/primary_button.dart';
+import 'package:http/http.dart' as http;
 
 class RegisterPage extends StatefulWidget {
-  const RegisterPage({Key? key}) : super(key: key);
+  const RegisterPage({super.key});
 
   @override
-  _RegisterPageState createState() => _RegisterPageState();
+  State<RegisterPage> createState() => _RegisterPageState();
 }
 
 class _RegisterPageState extends State<RegisterPage> {
+  GlobalKey<FormState> keyForm = GlobalKey<FormState>();
+  TextEditingController nameController = TextEditingController();
+  TextEditingController usernameController = TextEditingController();
+  TextEditingController emailController = TextEditingController();
+  TextEditingController passwordController = TextEditingController();
+
   bool passwordVisible = false;
-  bool passwordConfirmVisible = false;
+
   void togglePassword() {
     setState(() {
       passwordVisible = !passwordVisible;
     });
+  }
+
+  Future<GeneralResponse?> register() async {
+    try {
+      http.Response res =
+          await http.post((Uri.parse('$url/user/register')), body: {
+        'username': usernameController.text,
+        'password': passwordController.text,
+        'name': nameController.text,
+        'email': emailController.text,
+      });
+
+      GeneralResponse data = generalResponseFromJson(res.body);
+
+      if (data.success) {
+        setState(() {
+          ScaffoldMessenger.of(context)
+              .showSnackBar(SnackBar(content: Text(data.message)));
+          Navigator.pushReplacement(
+              context, MaterialPageRoute(builder: (_) => const LoginPage()));
+        });
+      } else {
+        setState(() {
+          ScaffoldMessenger.of(context)
+              .showSnackBar(SnackBar(content: Text(data.message)));
+        });
+      }
+    } catch (e) {
+      setState(() {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(e.toString())));
+      });
+    }
+    return null;
   }
 
   @override
@@ -26,7 +69,7 @@ class _RegisterPageState extends State<RegisterPage> {
       backgroundColor: Colors.white,
       body: SafeArea(
           child: Padding(
-        padding: EdgeInsets.fromLTRB(24, 40, 24, 0),
+        padding: const EdgeInsets.fromLTRB(24, 40, 24, 0),
         child: SingleChildScrollView(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -35,12 +78,10 @@ class _RegisterPageState extends State<RegisterPage> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Kesehatan\nRegister',
+                    'Create an account',
                     style: heading2.copyWith(color: textBlack),
                   ),
-                  SizedBox(
-                    height: 20,
-                  ),
+                  const SizedBox(height: 16),
                   Image.asset(
                     'images/accent.png',
                     width: 99,
@@ -48,89 +89,107 @@ class _RegisterPageState extends State<RegisterPage> {
                   )
                 ],
               ),
-              SizedBox(
-                height: 48,
-              ),
+              const SizedBox(height: 48),
               Form(
+                  key: keyForm,
+                  autovalidateMode: AutovalidateMode.onUserInteraction,
                   child: Column(
-                children: [
-                  Container(
-                    decoration: BoxDecoration(
-                        color: textWhiteGrey,
-                        borderRadius: BorderRadius.circular(14)),
-                    child: TextFormField(
-                      decoration: InputDecoration(
-                          hintText: 'Email',
-                          hintStyle: heading6.copyWith(color: textGrey),
-                          border:
-                              OutlineInputBorder(borderSide: BorderSide.none)),
-                    ),
-                  ),
-                  SizedBox(
-                    height: 32,
-                  ),
-                  Container(
-                    decoration: BoxDecoration(
-                        color: textWhiteGrey,
-                        borderRadius: BorderRadius.circular(14)),
-                    child: TextFormField(
-                      obscureText: !passwordVisible,
-                      decoration: InputDecoration(
-                          hintText: 'Password',
-                          hintStyle: heading6.copyWith(color: textGrey),
-                          suffixIcon: IconButton(
-                            color: textGrey,
-                            splashRadius: 1,
-                            icon: Icon(passwordVisible
-                                ? Icons.visibility_outlined
-                                : Icons.visibility_off_outlined),
-                            onPressed: togglePassword,
-                          ),
-                          border:
-                              OutlineInputBorder(borderSide: BorderSide.none)),
-                    ),
-                  ),
-                  SizedBox(
-                    height: 32,
-                  ),
-                  Container(
-                    decoration: BoxDecoration(
-                        color: textWhiteGrey,
-                        borderRadius: BorderRadius.circular(14)),
-                    child: TextFormField(
-                      obscureText: !passwordConfirmVisible,
-                      decoration: InputDecoration(
-                          hintText: 'Password Confirmation',
-                          hintStyle: heading6.copyWith(color: textGrey),
-                          suffixIcon: IconButton(
-                            color: textGrey,
-                            splashRadius: 1,
-                            icon: Icon(passwordConfirmVisible
-                                ? Icons.visibility_outlined
-                                : Icons.voice_over_off_outlined),
-                            onPressed: () {
-                              setState(() {
-                                passwordConfirmVisible =
-                                    !passwordConfirmVisible;
-                              });
+                    children: [
+                      Container(
+                        decoration: BoxDecoration(
+                            color: textWhiteGrey,
+                            borderRadius: BorderRadius.circular(14)),
+                        child: TextFormField(
+                          controller: nameController,
+                          validator: (value) {
+                            return value!.isEmpty
+                                ? "Name can't be empty"
+                                : null;
+                          },
+                          style: regular16pt,
+                          decoration: InputDecoration(
+                              hintText: 'Name',
+                              hintStyle: heading6.copyWith(color: textGrey),
+                              border: const OutlineInputBorder(
+                                  borderSide: BorderSide.none)),
+                        ),
+                      ),
+                      const SizedBox(height: 32),
+                      Container(
+                        decoration: BoxDecoration(
+                            color: textWhiteGrey,
+                            borderRadius: BorderRadius.circular(14)),
+                        child: TextFormField(
+                          controller: usernameController,
+                          validator: (value) {
+                            return value!.isEmpty
+                                ? "Username can't be empty"
+                                : null;
+                          },
+                          style: regular16pt,
+                          decoration: InputDecoration(
+                              hintText: 'Username',
+                              hintStyle: heading6.copyWith(color: textGrey),
+                              border: const OutlineInputBorder(
+                                  borderSide: BorderSide.none)),
+                        ),
+                      ),
+                      const SizedBox(height: 32),
+                      Container(
+                        decoration: BoxDecoration(
+                            color: textWhiteGrey,
+                            borderRadius: BorderRadius.circular(14)),
+                        child: TextFormField(
+                          controller: emailController,
+                          validator: (value) {
+                            return value!.isEmpty
+                                ? "Email can't be empty"
+                                : null;
+                          },
+                          style: regular16pt,
+                          decoration: InputDecoration(
+                              hintText: 'Email',
+                              hintStyle: heading6.copyWith(color: textGrey),
+                              border: const OutlineInputBorder(
+                                  borderSide: BorderSide.none)),
+                        ),
+                      ),
+                      const SizedBox(height: 32),
+                      Container(
+                        decoration: BoxDecoration(
+                            color: textWhiteGrey,
+                            borderRadius: BorderRadius.circular(14)),
+                        child: TextFormField(
+                            controller: passwordController,
+                            validator: (value) {
+                              return value!.isEmpty
+                                  ? "Password can't be empty"
+                                  : null;
                             },
-                          ),
-                          border:
-                              OutlineInputBorder(borderSide: BorderSide.none)),
-                    ),
-                  )
-                ],
-              )),
-              SizedBox(
-                height: 32,
-              ),
+                            obscureText: !passwordVisible,
+                            style: regular16pt,
+                            decoration: InputDecoration(
+                                hintText: 'Password',
+                                hintStyle: heading6.copyWith(color: textGrey),
+                                suffixIcon: IconButton(
+                                  color: textGrey,
+                                  splashRadius: 1,
+                                  icon: Icon(passwordVisible
+                                      ? Icons.visibility_rounded
+                                      : Icons.visibility_off_rounded),
+                                  onPressed: togglePassword,
+                                ),
+                                border: const OutlineInputBorder(
+                                    borderSide: BorderSide.none))),
+                      ),
+                    ],
+                  )),
+              const SizedBox(height: 32),
               Row(
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: [
-                  CustomCheckbox(),
-                  SizedBox(
-                    width: 12,
-                  ),
+                  const CustomCheckbox(),
+                  const SizedBox(width: 12),
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -140,27 +199,20 @@ class _RegisterPageState extends State<RegisterPage> {
                       ),
                       Text(
                         'Term & Condition',
-                        style: regular16pt.copyWith(color: primaryBlue),
+                        style: regular16pt.copyWith(color: primary),
                       )
                     ],
                   )
                 ],
               ),
-              SizedBox(
-                height: 32,
-              ),
+              const SizedBox(height: 32),
               CustomPrimaryButton(
-                buttonColor: primaryBlue,
+                buttonColor: primary,
                 textValue: 'Register',
                 textColor: Colors.white,
-                onTap: () {
-                  Navigator.pushReplacement(context,
-                      MaterialPageRoute(builder: (context) => LoginPage()));
-                },
+                onTap: register,
               ),
-              SizedBox(
-                height: 50,
-              ),
+              const SizedBox(height: 50),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
@@ -170,11 +222,14 @@ class _RegisterPageState extends State<RegisterPage> {
                   ),
                   GestureDetector(
                     onTap: () {
-                      Navigator.pop(context);
+                      Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => const LoginPage()));
                     },
                     child: Text(
                       'Login',
-                      style: regular16pt.copyWith(color: primaryBlue),
+                      style: regular16pt.copyWith(color: primary),
                     ),
                   )
                 ],

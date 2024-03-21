@@ -1,32 +1,28 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:kesehatan/pages/login.dart';
+import 'package:kesehatan/pages/home_page.dart';
 
 class SplashScreenPage extends StatefulWidget {
-  const SplashScreenPage({Key? key}) : super(key: key);
+  const SplashScreenPage({super.key});
 
   @override
-  _SplashScreenPageState createState() => _SplashScreenPageState();
+  State<SplashScreenPage> createState() => _SplashScreenPageState();
 }
 
 class _SplashScreenPageState extends State<SplashScreenPage> {
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     openSplashScreen();
   }
 
   openSplashScreen() async {
-    //bisa diganti beberapa detik sesuai keinginan
     var durasiSplash = const Duration(milliseconds: 2000);
 
     return Timer(durasiSplash, () {
-      //pindah ke halaman home
-      Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (_) {
-        return const LoginPage();
-      }));
+      Navigator.of(context)
+          .pushReplacement(MaterialPageRoute(builder: (_) => const HomePage()));
     });
   }
 
@@ -36,9 +32,10 @@ class _SplashScreenPageState extends State<SplashScreenPage> {
       backgroundColor: Colors.white,
       body: Center(
         child: Image.asset(
-          "images/logo.jpg",
-          width: 200,
-          height: 88,
+          "assets/logo.png",
+          width: 128,
+          height: 128,
+          fit: BoxFit.contain,
         ),
       ),
     );
